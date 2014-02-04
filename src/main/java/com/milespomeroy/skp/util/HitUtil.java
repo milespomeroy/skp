@@ -1,17 +1,85 @@
 package com.milespomeroy.skp.util;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Strings;
+import com.milespomeroy.skp.search.SearchDomainEnum;
 import com.milespomeroy.skp.search.SearchReferrer;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.util.List;
 
 public class HitUtil {
     /**
      * Find a search domain/keyword in the referral URL.
      * @param referralUrl
-     * @return search domain/keyword as SearchReferrer or null if not found in URL.
+     * @return search domain/keyword as SearchReferrer or Optional.absent if not found in URL.
      */
-    public static SearchReferrer findSearchReferrer(String referralUrl) {
-        return null;
+    public static Optional<SearchReferrer> findSearchReferrer(String referralUrl) {
+        URI url;
+
+        try {
+            url = new URI(referralUrl);
+        } catch (URISyntaxException | NullPointerException e) {
+            return Optional.absent();
+        }
+
+        Optional<SearchDomainEnum> searchDomain = findSearchDomain(url.getHost());
+        if(!searchDomain.isPresent()) {
+            return Optional.absent();
+        }
+
+        SearchDomainEnum searchDomainEnum = searchDomain.get();
+        Optional<String> searchParam = findSearchQueryParam(url, searchDomainEnum.getQueryParam());
+
+        SearchReferrer sr = new SearchReferrer(searchDomainEnum, searchParam.or(""));
+
+        return Optional.of(sr);
+    }
+
+    /**
+     * Find a search domain enum given a host string like 'www.google.com'.
+     * @param host
+     * @return
+     */
+    public static Optional<SearchDomainEnum> findSearchDomain(String host) {
+        if(Strings.isNullOrEmpty(host)) {
+            return Optional.absent();
+        }
+
+        if(host.startsWith("www")) {
+            host = host.substring(4);
+        }
+
+        for(SearchDomainEnum searchDomain : SearchDomainEnum.values()) {
+            if(searchDomain.getName().equals(host)) {
+                return Optional.of(searchDomain);
+            }
+        }
+
+        return Optional.absent();
+    }
+
+    /**
+     * Find a search query param value from a uri.
+     * @param uri URI possibly containing a search query param.
+     * @param searchQueryParamName The search domain type for the uri.
+     * @return The first value found with the matching searchQueryParamName given. Optional.absent is none found.
+     */
+    public static Optional<String> findSearchQueryParam(URI uri, String searchQueryParamName) {
+        List<NameValuePair> queryParams = URLEncodedUtils.parse(uri, Charset.defaultCharset().name());
+
+        for(NameValuePair param : queryParams) {
+            if(param.getName().equals(searchQueryParamName)) {
+                return Optional.of(param.getValue());
+            }
+        }
+
+        return Optional.absent();
     }
 
     /**

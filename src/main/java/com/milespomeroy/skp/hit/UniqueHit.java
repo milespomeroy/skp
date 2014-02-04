@@ -1,5 +1,6 @@
 package com.milespomeroy.skp.hit;
 
+import com.google.common.base.Optional;
 import com.milespomeroy.skp.search.SearchReferrer;
 import com.milespomeroy.skp.util.HitUtil;
 
@@ -7,7 +8,7 @@ import java.math.BigDecimal;
 
 public class UniqueHit {
     private String ip;
-    private SearchReferrer searchReferrer;
+    private Optional<SearchReferrer> searchReferrer;
     private BigDecimal revenue;
 
     /**
@@ -26,7 +27,7 @@ public class UniqueHit {
      * @param hit
      */
     public void combine(Hit hit) {
-        if(this.searchReferrer == null) {
+        if(!this.searchReferrer.isPresent()) {
             this.searchReferrer = HitUtil.findSearchReferrer(hit.getReferrer());
         }
         this.revenue = this.revenue.add(HitUtil.findRevenue(hit.getProductList()));

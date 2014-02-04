@@ -2,7 +2,7 @@ package com.milespomeroy.skp.search;
 
 public enum SearchDomainEnum {
     GOOGLE("google.com", "q"),
-    YAHOO("yahoo.com", "p"),
+    YAHOO("search.yahoo.com", "p"),
     BING("bing.com", "q");
 
     private String name;
