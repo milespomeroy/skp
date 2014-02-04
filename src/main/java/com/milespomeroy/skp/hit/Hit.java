@@ -1,4 +1,4 @@
-package com.milespomeroy.skp;
+package com.milespomeroy.skp.hit;
 
 public class Hit {
     private String ip;

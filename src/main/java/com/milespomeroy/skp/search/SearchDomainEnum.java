@@ -1,4 +1,4 @@
-package com.milespomeroy.skp;
+package com.milespomeroy.skp.search;
 
 public enum SearchDomainEnum {
     GOOGLE("google.com", "q"),

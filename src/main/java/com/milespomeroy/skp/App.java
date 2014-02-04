@@ -1,9 +1,11 @@
 package com.milespomeroy.skp;
 
+import com.milespomeroy.skp.hit.Hit;
 import org.supercsv.cellprocessor.Optional;
 import org.supercsv.cellprocessor.ParseInt;
 import org.supercsv.cellprocessor.constraint.NotNull;
 import org.supercsv.cellprocessor.ift.CellProcessor;
+import org.supercsv.exception.SuperCsvException;
 import org.supercsv.io.CsvBeanReader;
 import org.supercsv.io.ICsvBeanReader;
 import org.supercsv.prefs.CsvPreference;
@@ -16,9 +18,9 @@ import java.io.IOException;
  * Hello world!
  */
 public class App {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         if(args.length == 0) {
-            System.out.println("Please provide a data file for processing.");
+            System.err.println("Please provide a data file for processing.");
             return;
         }
 
@@ -27,7 +29,7 @@ public class App {
         try {
             fileReader = new FileReader(filename);
         } catch (FileNotFoundException e) {
-            System.out.println("File was not found: " + filename);
+            System.err.println("File was not found: " + filename);
             return;
         }
 
@@ -63,10 +65,15 @@ public class App {
                 "referrer"
         };
 
-        tabReader.getHeader(true); // skip header
-        Hit hit;
-        while((hit = tabReader.read(Hit.class, nameMapping, cellProcessors)) != null) {
-            System.out.println(hit);
+        try {
+            tabReader.getHeader(true); // skip header
+            Hit hit;
+            while((hit = tabReader.read(Hit.class, nameMapping, cellProcessors)) != null) {
+                System.out.println(hit);
+            }
+        } catch (IOException | SuperCsvException e) {
+            System.err.println("Error reading " + filename + ". Is it tab delimited hit data?");
+            return;
         }
     }
 }
