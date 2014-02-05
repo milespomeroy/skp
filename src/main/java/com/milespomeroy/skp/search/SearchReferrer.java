@@ -16,4 +16,12 @@ public class SearchReferrer {
     public String getSearchKeyword() {
         return searchKeyword;
     }
+
+    @Override
+    public String toString() {
+        return "SearchReferrer{" +
+                "searchDomain=" + searchDomain +
+                ", searchKeyword='" + searchKeyword + '\'' +
+                '}';
+    }
 }

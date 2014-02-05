@@ -1,6 +1,7 @@
 package com.milespomeroy.skp;
 
 import com.milespomeroy.skp.hit.Hit;
+import com.milespomeroy.skp.hit.UniqueHit;
 import org.supercsv.cellprocessor.Optional;
 import org.supercsv.cellprocessor.ParseInt;
 import org.supercsv.cellprocessor.constraint.NotNull;
@@ -13,17 +14,23 @@ import org.supercsv.prefs.CsvPreference;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Hello world!
+ * skp: Search Keyword Performance
+ * Take in a tab delimited file containing a hit data set.
+ * Return a tab delimited file with search keywords, ordered by total revenue descending.
  */
 public class App {
     public static void main(String[] args) {
+        // check for filename arg
         if(args.length == 0) {
             System.err.println("Please provide a data file for processing.");
             return;
         }
 
+        // get file
         String filename = args[0];
         FileReader fileReader;
         try {
@@ -34,46 +41,28 @@ public class App {
         }
 
         ICsvBeanReader tabReader = new CsvBeanReader(fileReader, CsvPreference.TAB_PREFERENCE);
-
-        CellProcessor[] cellProcessors = new CellProcessor[]{
-                new ParseInt(), // hit_time_gmt
-                null, // date_time
-                null, // user_agent
-                new NotNull(), // ip
-                new Optional(), // event_list
-                null, // geo_city
-                null, // geo_region
-                null, // geo_country
-                null, // pagename
-                null, // pageurl
-                new Optional(), // product_list
-                new Optional() // referrer
-        };
-
-        String[] nameMapping = new String[] {
-                "gmtTime",
-                null,
-                null,
-                "ip",
-                "eventList",
-                null,
-                null,
-                null,
-                null,
-                null,
-                "productList",
-                "referrer"
-        };
+        Map<String, UniqueHit> uniqueHitsByIp = new HashMap<>();
 
         try {
             tabReader.getHeader(true); // skip header
+
             Hit hit;
-            while((hit = tabReader.read(Hit.class, nameMapping, cellProcessors)) != null) {
-                System.out.println(hit);
+            while((hit = tabReader.read(Hit.class, Hit.NAME_MAPPING, Hit.CELL_PROCESSORS)) != null) {
+                UniqueHit uniqueHit = uniqueHitsByIp.get(hit.getIp());
+
+                if(uniqueHit == null) { // doesn't exist in map yet
+                    uniqueHitsByIp.put(hit.getIp(), new UniqueHit(hit));
+                } else {
+                    uniqueHit.combine(hit);
+                }
             }
         } catch (IOException | SuperCsvException e) {
             System.err.println("Error reading " + filename + ". Is it tab delimited hit data?");
             return;
+        }
+
+        for(Map.Entry<String, UniqueHit> uniqueHitByIp : uniqueHitsByIp.entrySet()) {
+            System.out.println(uniqueHitByIp.getValue());
         }
     }
 }
