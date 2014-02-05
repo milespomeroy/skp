@@ -1,13 +1,18 @@
 package com.milespomeroy.skp;
 
+import com.google.common.base.Optional;
 import com.milespomeroy.skp.reader.TabReader;
 import com.milespomeroy.skp.agg.AggregateUniqueHit;
 import com.milespomeroy.skp.hit.UniqueHit;
+import com.milespomeroy.skp.result.SearchKeywordPerformance;
+import com.milespomeroy.skp.search.SearchReferrer;
 import org.supercsv.exception.SuperCsvException;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -44,8 +49,30 @@ public class App {
             return;
         }
 
-        for(Map.Entry<String, UniqueHit> uniqueHitByIp : uniqueHitsByIp.entrySet()) {
-            System.out.println(uniqueHitByIp.getValue());
+        Map<SearchReferrer, SearchKeywordPerformance> aggregateSearchReferrer = new HashMap<>();
+        Optional<SearchReferrer> optSearchReferrer;
+        for(UniqueHit uniqueHit : uniqueHitsByIp.values()) {
+            optSearchReferrer = uniqueHit.getSearchReferrer();
+
+            if(! optSearchReferrer.isPresent()) {
+                continue;
+            }
+
+            SearchReferrer searchReferrer = optSearchReferrer.get();
+            SearchKeywordPerformance skp = aggregateSearchReferrer.get(searchReferrer);
+            BigDecimal revenue = uniqueHit.getRevenue();
+
+            if(skp == null) {
+                aggregateSearchReferrer.put(searchReferrer,
+                                            new SearchKeywordPerformance(searchReferrer, revenue));
+            } else {
+                skp.addRevenue(revenue);
+            }
+        }
+
+
+        for(SearchKeywordPerformance skp : aggregateSearchReferrer.values()) {
+            System.out.println(skp);
         }
     }
 }

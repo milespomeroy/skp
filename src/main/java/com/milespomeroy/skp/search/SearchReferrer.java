@@ -18,6 +18,26 @@ public class SearchReferrer {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SearchReferrer that = (SearchReferrer) o;
+
+        if (searchDomain != that.searchDomain) return false;
+        if (!searchKeyword.equals(that.searchKeyword)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = searchDomain.hashCode();
+        result = 31 * result + searchKeyword.hashCode();
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "SearchReferrer{" +
                 "searchDomain=" + searchDomain +
