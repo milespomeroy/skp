@@ -33,6 +33,18 @@ public class UniqueHit {
         this.revenue = this.revenue.add(HitUtil.findRevenue(hit.getProductList()));
     }
 
+    public String getIp() {
+        return ip;
+    }
+
+    public Optional<SearchReferrer> getSearchReferrer() {
+        return searchReferrer;
+    }
+
+    public BigDecimal getRevenue() {
+        return revenue;
+    }
+
     @Override
     public String toString() {
         return "UniqueHit{" +
