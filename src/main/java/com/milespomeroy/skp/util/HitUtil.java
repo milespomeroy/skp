@@ -71,6 +71,10 @@ public class HitUtil {
      * @return The first value found with the matching searchQueryParamName given. Optional.absent is none found.
      */
     public static Optional<String> findSearchQueryParam(URI uri, String searchQueryParamName) {
+        if(uri == null) {
+            return Optional.absent();
+        }
+
         List<NameValuePair> queryParams = URLEncodedUtils.parse(uri, Charset.defaultCharset().name());
 
         for(NameValuePair param : queryParams) {
@@ -85,9 +89,25 @@ public class HitUtil {
     /**
      * Find a revenue in the product list.
      * @param productList
-     * @return
+     * @return Total of revenue found in productList. 0.00 if not found.
      */
     public static BigDecimal findRevenue(String productList) {
-        return null;
+        BigDecimal totalRevenue = new BigDecimal(0);
+
+        if(Strings.isNullOrEmpty(productList)) {
+            return totalRevenue; // zero
+        }
+
+        String[] products = productList.split(",");
+        for(String product : products) {
+            String[] productMeta = product.split(";");
+
+            if(productMeta.length > 3) {
+                BigDecimal revenue = new BigDecimal(productMeta[3]);
+                totalRevenue = totalRevenue.add(revenue);
+            }
+        }
+
+        return totalRevenue;
     }
 }

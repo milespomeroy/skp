@@ -61,11 +61,41 @@ class HitUtilSpec extends Specification {
         _ | "milespomeroy.com"
     }
 
-    def "FindSearchQueryParam"() {
+    def "FindSearchQueryParam should find the correct query param"() {
+        expect:
+        HitUtil.findSearchQueryParam(new URI(urlString), paramName).get() == expected
 
+        where:
+        paramName   | expected  | urlString
+        "q"         | "yo yo"   | "http://google.com/?q=yo+yo"
+        "search_str"| "hajo"    | "https://www.bing.com/hello/to/you?bebo=toto&search_str=hajo"
+        "pea soup"  | "yea"     | "http://www.google.com/searcher?pea%20soup=yea"
     }
 
-    def "FindRevenue"() {
+    def "FindSearchQueryParam should return Optional.absent when not found or invalid"() {
+        expect:
+        ! HitUtil.findSearchQueryParam(uri, paramName).isPresent()
 
+        where:
+        paramName   | uri
+        "q"         | new URI("")
+        "q"         | null
+        "q"         | new URI("http://www.google.com/searcher?pea%20soup=yea")
+        null        | new URI("http://google.com/?q=yo+yo")
+    }
+
+    def "FindRevenue should find correct revenue from product list"() {
+        expect:
+        HitUtil.findRevenue(productList) == expected
+
+        where:
+        expected | productList
+        0.00     | ""
+        0        | null
+        250.00   | "Electronics;Zune - 32GB;1;250;"
+        1004.00  | /Computers;HP Pavillion;1;1000;200|201,Office Supplies;Red Folders;4;4.00;205|206|207/
+        0        | "Electronics;Ipod - Nano - 8GB;1;;"
+        250.02   | "Electronics;Ipod - Nano - 8GB;1;;,Electronics;Zune - 32GB;1;250.02;"
+        125.38   | "Electronics;Ipod - Nano - 8GB;1;89.75;,Electronics;Zune - 32GB;1;35.63;"
     }
 }
