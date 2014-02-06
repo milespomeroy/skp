@@ -4,7 +4,7 @@ import com.milespomeroy.skp.search.SearchReferrer;
 
 import java.math.BigDecimal;
 
-public class SearchKeywordPerformance {
+public class SearchKeywordPerformance implements Comparable<SearchKeywordPerformance> {
     private final String searchEngineDomain;
     private final String searchKeyword;
     private BigDecimal revenue;
@@ -38,5 +38,15 @@ public class SearchKeywordPerformance {
                 ", searchKeyword='" + searchKeyword + '\'' +
                 ", revenue=" + revenue +
                 '}';
+    }
+
+    /**
+     * Used for sorting by revenue descending.
+     * @param that
+     * @return
+     */
+    @Override
+    public int compareTo(SearchKeywordPerformance that) {
+        return - this.revenue.compareTo(that.revenue);
     }
 }

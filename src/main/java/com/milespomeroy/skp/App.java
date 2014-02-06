@@ -7,13 +7,21 @@ import com.milespomeroy.skp.hit.UniqueHit;
 import com.milespomeroy.skp.result.SearchKeywordPerformance;
 import com.milespomeroy.skp.search.SearchReferrer;
 import org.supercsv.exception.SuperCsvException;
+import org.supercsv.io.CsvBeanWriter;
+import org.supercsv.io.ICsvBeanWriter;
+import org.supercsv.prefs.CsvPreference;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Writer;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * skp: Search Keyword Performance
@@ -70,9 +78,29 @@ public class App {
             }
         }
 
+        List<SearchKeywordPerformance> results = new ArrayList<>(aggregateSearchReferrer.values());
+        Collections.sort(results);
 
-        for(SearchKeywordPerformance skp : aggregateSearchReferrer.values()) {
-            System.out.println(skp);
+        Date today = new Date();
+        SimpleDateFormat isoDate = new SimpleDateFormat("yyyy-MM-dd");
+        String isoToday = isoDate.format(today);
+        Path resultsFilePath = Paths.get(isoToday + "_SearchKeywordPerformance.tab");
+        try {
+            Writer writer = Files.newBufferedWriter(resultsFilePath, StandardCharsets.UTF_8);
+            try(ICsvBeanWriter beanWriter = new CsvBeanWriter(  writer,
+                                                                CsvPreference.TAB_PREFERENCE))
+            {
+                beanWriter.writeHeader("Search Engine Domain", "Search Keyword", "Revenue");
+
+                for(final SearchKeywordPerformance skp : results) {
+                    beanWriter.write(skp, "searchEngineDomain", "searchKeyword", "revenue");
+                }
+            }
+        } catch (IOException | SuperCsvException e) {
+            System.err.println("Error writing the results to file.");
+            return;
         }
+
+        System.out.println("Wrote results to: " + resultsFilePath.toString());
     }
 }
