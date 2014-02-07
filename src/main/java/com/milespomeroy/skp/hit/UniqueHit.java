@@ -3,6 +3,10 @@ package com.milespomeroy.skp.hit;
 import com.google.common.base.Optional;
 import com.milespomeroy.skp.search.SearchReferrer;
 import com.milespomeroy.skp.util.HitUtil;
+import org.supercsv.cellprocessor.FmtNumber;
+import org.supercsv.cellprocessor.ParseBigDecimal;
+import org.supercsv.cellprocessor.constraint.NotNull;
+import org.supercsv.cellprocessor.ift.CellProcessor;
 
 import java.math.BigDecimal;
 
@@ -41,6 +45,14 @@ public class UniqueHit {
         return searchReferrer;
     }
 
+    public SearchReferrer getSearchReferrerIfExists() {
+        if(this.searchReferrer.isPresent()) {
+            return this.searchReferrer.get();
+        }
+
+        return null;
+    }
+
     public BigDecimal getRevenue() {
         return revenue;
     }
@@ -53,4 +65,25 @@ public class UniqueHit {
                 ", revenue=" + revenue +
                 '}';
     }
+
+    public static final String[] NAME_MAPPING = new String[] {
+            "ip",
+            "searchReferrer",
+            "revenue"
+    };
+
+    public static final String[] FIELD_MAPPING = new String[] {
+            "ip",
+            "searchReferrerIfExists.searchDomain",
+            "searchReferrerIfExists.searchKeyword",
+            "revenue"
+    };
+
+    public static final CellProcessor[] CELL_PROCESSORS = new CellProcessor[] {
+            new NotNull(),
+            new org.supercsv.cellprocessor.Optional(),
+            new org.supercsv.cellprocessor.Optional(),
+            new FmtNumber("#.##")
+    };
+
 }

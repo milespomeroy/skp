@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<row xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <delimiter>&#009;</delimiter>
+
+    <column xsi:type="Integer">
+        <name>hit_time_gmt</name>
+        <sortOrder>2</sortOrder>
+    </column>
+
+    <column xsi:type="String">
+        <name>ip</name>
+        <sortOrder>1</sortOrder>
+    </column>
+
+    <column xsi:type="String">
+        <name>event_list</name>
+    </column>
+
+    <column xsi:type="String">
+        <name>project_list</name>
+    </column>
+
+    <column xsi:type="String">
+        <name>referrer</name>
+    </column>
+</row>

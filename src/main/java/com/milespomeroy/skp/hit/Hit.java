@@ -1,5 +1,6 @@
 package com.milespomeroy.skp.hit;
 
+import com.milespomeroy.skp.util.HitUtil;
 import org.supercsv.cellprocessor.Optional;
 import org.supercsv.cellprocessor.ParseInt;
 import org.supercsv.cellprocessor.constraint.NotNull;
@@ -82,7 +83,7 @@ public class Hit {
             new Optional() // referrer
     };
 
-    public static final String[] NAME_MAPPING = new String[] {
+    public static final String[] ORIG_NAME_MAPPING = new String[] {
             "gmtTime",
             null,
             null,
@@ -96,4 +97,9 @@ public class Hit {
             "productList",
             "referrer"
     };
+
+    public static final String[] SLIM_NAME_MAPPING =
+            HitUtil.removeNulls(ORIG_NAME_MAPPING).toArray(new String[0]);
+    public static final CellProcessor[] SLIM_CELL_PROCESSORS =
+            HitUtil.removeNulls(CELL_PROCESSORS).toArray(new CellProcessor[0]);
 }

@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 
 public class HitUtil {
@@ -109,5 +110,21 @@ public class HitUtil {
         }
 
         return totalRevenue;
+    }
+
+    /**
+     * Remove null items from an array.
+     * @param items
+     * @return An ArrayList of items without nulls.
+     */
+    public static <T> List<T> removeNulls(T[] items) {
+        List<T> unnulled = new ArrayList<>();
+
+        for(T item : items) {
+            if(item != null) {
+                unnulled.add(item);
+            }
+        }
+        return unnulled;
     }
 }

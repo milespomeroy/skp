@@ -34,7 +34,7 @@ public class AggregateUniqueHit {
         }
 
         Hit hit;
-        while((hit = this.reader.read(Hit.class, Hit.NAME_MAPPING, Hit.CELL_PROCESSORS)) != null) {
+        while((hit = this.reader.read(Hit.class, Hit.ORIG_NAME_MAPPING, Hit.CELL_PROCESSORS)) != null) {
             UniqueHit uniqueHit = uniqueHitsByIp.get(hit.getIp());
 
             if(uniqueHit == null) { // doesn't exist in map yet
