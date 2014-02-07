@@ -5,19 +5,30 @@ import com.milespomeroy.skp.hit.Hit;
 import com.milespomeroy.skp.hit.UniqueHit;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Take a tab delimited file of hit data and aggregate into unique hits based on IP address.
+ *
+ * Usage: Create object by giving it a TabReader. Then call the aggregate function.
+ * Use the get methods to obtain results.
+ */
 public class AggregateUniqueHit {
     private final TabReader reader;
+
+    private Map<String, UniqueHit> uniqueHitsByIp = new HashMap<>();
 
     public AggregateUniqueHit(TabReader reader) {
         this.reader = reader;
     }
 
-    public Map<String, UniqueHit> getUniqueHitsByIp() throws IOException {
-        Map<String, UniqueHit> uniqueHitsByIp = new HashMap<>();
-
+    /**
+     *
+     * @throws IOException
+     */
+    public void aggregate() throws IOException {
         if(this.reader.hasHeader()) {
             this.reader.getHeader(true); // skip header
         }
@@ -32,7 +43,13 @@ public class AggregateUniqueHit {
                 uniqueHit.combine(hit);
             }
         }
+    }
 
-        return uniqueHitsByIp;
+    public Collection<UniqueHit> getUniqueHits() {
+        return this.uniqueHitsByIp.values();
+    }
+
+    public Map<String, UniqueHit> getUniqueHitsByIp() {
+        return this.uniqueHitsByIp;
     }
 }

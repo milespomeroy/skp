@@ -8,6 +8,7 @@ class AggregateUniqueHitSpec extends Specification {
     def "should aggregate correct total revenue amount when two separate purchases are made"() {
         setup:
         def agg = new AggregateUniqueHit(new TabReader(new StringReader(tab), false))
+        agg.aggregate();
 
         expect:
         agg.getUniqueHitsByIp().get(ip).getRevenue() == totalRev
@@ -24,7 +25,7 @@ class AggregateUniqueHitSpec extends Specification {
         def agg = new AggregateUniqueHit(new TabReader(new StringReader(tab), false))
 
         when:
-        agg.getUniqueHitsByIp()
+        agg.aggregate()
 
         then:
         thrown(SuperCsvException)

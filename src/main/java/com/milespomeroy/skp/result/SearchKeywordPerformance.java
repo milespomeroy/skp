@@ -49,4 +49,16 @@ public class SearchKeywordPerformance implements Comparable<SearchKeywordPerform
     public int compareTo(SearchKeywordPerformance that) {
         return - this.revenue.compareTo(that.revenue);
     }
+
+    public static final String[] HEADER = new String[] {
+            "Search Engine Domain",
+            "Search Keyword",
+            "Revenue"
+    };
+
+    public static final String[] NAME_MAPPING = new String[] {
+            "searchEngineDomain",
+            "searchKeyword",
+            "revenue"
+    };
 }

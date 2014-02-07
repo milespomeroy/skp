@@ -1,11 +1,10 @@
 package com.milespomeroy.skp;
 
-import com.google.common.base.Optional;
+import com.milespomeroy.skp.agg.AggregateSearchKeywordPerformance;
 import com.milespomeroy.skp.reader.TabReader;
 import com.milespomeroy.skp.agg.AggregateUniqueHit;
 import com.milespomeroy.skp.hit.UniqueHit;
 import com.milespomeroy.skp.result.SearchKeywordPerformance;
-import com.milespomeroy.skp.search.SearchReferrer;
 import org.supercsv.exception.SuperCsvException;
 import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.ICsvBeanWriter;
@@ -15,7 +14,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Writer;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,54 +44,44 @@ public class App {
             return;
         }
 
+        // aggregate hit data by IP address
         TabReader tabReader = new TabReader(fileReader, true);
         AggregateUniqueHit aggregateUniqueHit = new AggregateUniqueHit(tabReader);
-        Map<String, UniqueHit> uniqueHitsByIp;
 
         try {
-            uniqueHitsByIp = aggregateUniqueHit.getUniqueHitsByIp();
+            aggregateUniqueHit.aggregate();
         } catch (IOException | SuperCsvException e) {
             System.err.println("Error reading " + filename + ". Is it tab delimited hit data?");
             return;
         }
 
-        Map<SearchReferrer, SearchKeywordPerformance> aggregateSearchReferrer = new HashMap<>();
-        Optional<SearchReferrer> optSearchReferrer;
-        for(UniqueHit uniqueHit : uniqueHitsByIp.values()) {
-            optSearchReferrer = uniqueHit.getSearchReferrer();
+        Collection<UniqueHit> uniqueHits = aggregateUniqueHit.getUniqueHits();
 
-            if(! optSearchReferrer.isPresent()) {
-                continue;
-            }
+        // aggregate unique hits by search domain/keyword totaling revenue
+        AggregateSearchKeywordPerformance aggregateSkp = new AggregateSearchKeywordPerformance(uniqueHits);
+        aggregateSkp.aggregate();
+        Collection<SearchKeywordPerformance> skps = aggregateSkp.getSearchKeywordPerformances();
 
-            SearchReferrer searchReferrer = optSearchReferrer.get();
-            SearchKeywordPerformance skp = aggregateSearchReferrer.get(searchReferrer);
-            BigDecimal revenue = uniqueHit.getRevenue();
-
-            if(skp == null) {
-                aggregateSearchReferrer.put(searchReferrer,
-                                            new SearchKeywordPerformance(searchReferrer, revenue));
-            } else {
-                skp.addRevenue(revenue);
-            }
-        }
-
-        List<SearchKeywordPerformance> results = new ArrayList<>(aggregateSearchReferrer.values());
+        // Sort based on SearchKeywordPerformance comparator which is revenue descending
+        List<SearchKeywordPerformance> results = new ArrayList<>(skps);
         Collections.sort(results);
 
+        // Get today's date in the format needed for the filename
         Date today = new Date();
         SimpleDateFormat isoDate = new SimpleDateFormat("yyyy-MM-dd");
         String isoToday = isoDate.format(today);
+
+        // Write results out
         Path resultsFilePath = Paths.get(isoToday + "_SearchKeywordPerformance.tab");
         try {
             Writer writer = Files.newBufferedWriter(resultsFilePath, StandardCharsets.UTF_8);
             try(ICsvBeanWriter beanWriter = new CsvBeanWriter(  writer,
                                                                 CsvPreference.TAB_PREFERENCE))
             {
-                beanWriter.writeHeader("Search Engine Domain", "Search Keyword", "Revenue");
+                beanWriter.writeHeader(SearchKeywordPerformance.HEADER);
 
                 for(final SearchKeywordPerformance skp : results) {
-                    beanWriter.write(skp, "searchEngineDomain", "searchKeyword", "revenue");
+                    beanWriter.write(skp, SearchKeywordPerformance.NAME_MAPPING);
                 }
             }
         } catch (IOException | SuperCsvException e) {
