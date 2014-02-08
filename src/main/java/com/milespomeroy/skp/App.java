@@ -6,7 +6,6 @@ import com.foundations.comparator.structure.XMLStructureReader;
 import com.google.code.externalsorting.ExternalSort;
 import com.milespomeroy.skp.hit.Hit;
 import com.milespomeroy.skp.hit.UniqueHit;
-import com.milespomeroy.skp.reader.TabReader;
 import com.milespomeroy.skp.result.SearchKeywordPerformance;
 import org.supercsv.io.CsvBeanReader;
 import org.supercsv.io.CsvBeanWriter;
@@ -51,14 +50,12 @@ public class App {
         }
 
         // STEP 1: Slim hit data
-        TabReader tabReader = new TabReader(fileReader, true);
+        ICsvBeanReader tabReader = new CsvBeanReader(fileReader, CsvPreference.TAB_PREFERENCE);
         Path slimHitFilePath = Paths.get("slim-hit.tab");
         Writer writer = Files.newBufferedWriter(slimHitFilePath, StandardCharsets.UTF_8);
         try(ICsvBeanWriter beanWriter = new CsvBeanWriter(writer, CsvPreference.TAB_PREFERENCE))
         {
-            if(tabReader.hasHeader()) {
-                tabReader.getHeader(true); // skip header
-            }
+            tabReader.getHeader(true); // skip header
 
             Hit hit;
             while((hit = tabReader.read(Hit.class, Hit.ORIG_NAME_MAPPING, Hit.CELL_PROCESSORS)) != null) {
@@ -69,10 +66,16 @@ public class App {
         // STEP 2: Order by ip address
         Path hitIpOrderedFilePath = Paths.get("hit-ip-ordered.tab");
 
-        URL hitXmlUrl = App.class.getResource("hit.xml");
-        File hitXmlFile = new File(hitXmlUrl.toURI());
+        File hitXmlFile = new File("hit.xml");
+        IDataStructureReader config;
 
-        IDataStructureReader config = new XMLStructureReader(hitXmlFile);
+        try {
+            config = new XMLStructureReader(hitXmlFile);
+        } catch (IOException e) {
+            System.err.println("Error: hit.xml needs to be in working directory.");
+            return;
+        }
+
         RowComparator comparator = new RowComparator(config);
 
         List<File> fileList = ExternalSort.sortInBatch(
@@ -130,10 +133,15 @@ public class App {
         // STEP 4: order by search referrer
         Path uniqueReferrerOrderedPath = Paths.get("unique-hits-referrer-ordered.tab");
 
-        URL uniqueHitXmlUrl = App.class.getResource("unique_hit.xml");
-        File uniqueHitXmlFile = new File(uniqueHitXmlUrl.toURI());
+        File uniqueHitXmlFile = new File("unique_hit.xml");
 
-        config = new XMLStructureReader(uniqueHitXmlFile);
+        try {
+            config = new XMLStructureReader(uniqueHitXmlFile);
+        } catch (IOException e) {
+            System.err.println("Error: unique_hit.xml needs to be in working directory.");
+            return;
+        }
+
         comparator = new RowComparator(config);
 
         fileList = ExternalSort.sortInBatch(
@@ -216,10 +224,15 @@ public class App {
             headerWriter.write(headerLine, 0, headerLine.length());
         }
 
-        URL skpXmlUrl = App.class.getResource("search_keyword_performance.xml");
-        File skpXmlFile = new File(skpXmlUrl.toURI());
+        File skpXmlFile = new File("search_keyword_performance.xml");
 
-        config = new XMLStructureReader(skpXmlFile);
+        try {
+            config = new XMLStructureReader(skpXmlFile);
+        } catch (IOException e) {
+            System.err.println("Error: search_keyword_performance.xml needs to be in working directory.");
+            return;
+        }
+
         comparator = new RowComparator(config);
 
         // last sort by revenue descending
