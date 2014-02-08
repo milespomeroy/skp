@@ -1,6 +1,7 @@
 package com.milespomeroy.skp.hit;
 
 import com.google.common.base.Optional;
+import com.milespomeroy.skp.search.SearchDomainEnum;
 import com.milespomeroy.skp.search.SearchReferrer;
 import com.milespomeroy.skp.util.HitUtil;
 import org.supercsv.cellprocessor.FmtNumber;
@@ -12,8 +13,11 @@ import java.math.BigDecimal;
 
 public class UniqueHit {
     private String ip;
-    private Optional<SearchReferrer> searchReferrer;
+    private SearchDomainEnum searchDomainEnum;
+    private String searchKeyword;
     private BigDecimal revenue;
+
+    public UniqueHit() {}
 
     /**
      * Create a UniqueHit from a Hit.
@@ -21,7 +25,7 @@ public class UniqueHit {
      */
     public UniqueHit(Hit hit) {
         this.ip = hit.getIp();
-        this.searchReferrer = HitUtil.findSearchReferrer(hit.getReferrer());
+        setSearchReferrer(hit.getReferrer());
         this.revenue = HitUtil.findRevenue(hit.getProductList());
     }
 
@@ -31,8 +35,8 @@ public class UniqueHit {
      * @param hit
      */
     public void combine(Hit hit) {
-        if(!this.searchReferrer.isPresent()) {
-            this.searchReferrer = HitUtil.findSearchReferrer(hit.getReferrer());
+        if(this.searchDomainEnum == null) {
+            setSearchReferrer(hit.getReferrer());
         }
         this.revenue = this.revenue.add(HitUtil.findRevenue(hit.getProductList()));
     }
@@ -41,49 +45,72 @@ public class UniqueHit {
         return ip;
     }
 
-    public Optional<SearchReferrer> getSearchReferrer() {
-        return searchReferrer;
+    public SearchDomainEnum getSearchDomainEnum() {
+        return searchDomainEnum;
     }
 
-    public SearchReferrer getSearchReferrerIfExists() {
-        if(this.searchReferrer.isPresent()) {
-            return this.searchReferrer.get();
-        }
-
-        return null;
+    public String getSearchKeyword() {
+        return searchKeyword;
     }
 
     public BigDecimal getRevenue() {
         return revenue;
     }
 
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public void setSearchDomainEnum(SearchDomainEnum searchDomainEnum) {
+        this.searchDomainEnum = searchDomainEnum;
+    }
+
+    public void setSearchDomainEnum(String searchDomainEnum) {
+        this.searchDomainEnum = SearchDomainEnum.valueOf(searchDomainEnum);
+    }
+
+    public void setSearchKeyword(String searchKeyword) {
+        this.searchKeyword = searchKeyword;
+    }
+
+    public void setRevenue(BigDecimal revenue) {
+        this.revenue = revenue;
+    }
+
+    /**
+     * Find search referrer in referrer URL. If found, set searchDomainEnum and searchKeyword.
+     * @param referrer
+     */
+    private void setSearchReferrer(String referrer) {
+        Optional<SearchReferrer> searchReferrer = HitUtil.findSearchReferrer(referrer);
+        if(searchReferrer.isPresent()) {
+            this.searchDomainEnum = searchReferrer.get().getSearchDomain();
+            this.searchKeyword = searchReferrer.get().getSearchKeyword();
+        }
+    }
+
     @Override
     public String toString() {
         return "UniqueHit{" +
                 "ip='" + ip + '\'' +
-                ", searchReferrer=" + searchReferrer +
+                ", searchDomainEnum=" + searchDomainEnum +
+                ", searchKeyword='" + searchKeyword + '\'' +
                 ", revenue=" + revenue +
                 '}';
     }
 
     public static final String[] NAME_MAPPING = new String[] {
             "ip",
-            "searchReferrer",
+            "searchDomainEnum",
+            "searchKeyword",
             "revenue"
     };
 
-    public static final String[] FIELD_MAPPING = new String[] {
-            "ip",
-            "searchReferrerIfExists.searchDomain",
-            "searchReferrerIfExists.searchKeyword",
-            "revenue"
-    };
-
-    public static final CellProcessor[] CELL_PROCESSORS = new CellProcessor[] {
+    public static final CellProcessor[] READ_CELL_PROCESSORS = new CellProcessor[] {
             new NotNull(),
             new org.supercsv.cellprocessor.Optional(),
             new org.supercsv.cellprocessor.Optional(),
-            new FmtNumber("#.##")
+            new ParseBigDecimal()
     };
 
 }

@@ -57,7 +57,7 @@ public class HitUtil {
         }
 
         for(SearchDomainEnum searchDomain : SearchDomainEnum.values()) {
-            if(searchDomain.getName().equals(host)) {
+            if(searchDomain.getDomainName().equals(host)) {
                 return Optional.of(searchDomain);
             }
         }

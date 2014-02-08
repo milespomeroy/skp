@@ -40,12 +40,12 @@ class AppSpec extends Specification {
         errContent.toString() == "File was not found: nonexistant_file.txt\n"
     }
 
-    def "should require a properly formatted tab delimited file"() {
-        when:
-        String[] args = ["pom.xml"]
-        App.main(args)
-
-        then:
-        errContent.toString() == "Error reading pom.xml. Is it tab delimited hit data?\n"
-    }
+//    def "should require a properly formatted tab delimited file"() {
+//        when:
+//        String[] args = ["pom.xml"]
+//        App.main(args)
+//
+//        then:
+//        errContent.toString() == "Error reading pom.xml. Is it tab delimited hit data?\n"
+//    }
 }

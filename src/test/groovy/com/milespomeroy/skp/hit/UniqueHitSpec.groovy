@@ -42,8 +42,7 @@ class UniqueHitSpec extends Specification {
         uniqueHit.combine(hit2)
 
         then:
-        uniqueHit.getSearchReferrer().isPresent()
-        uniqueHit.getSearchReferrer().get().getSearchDomain() == expected
+        uniqueHit.getSearchDomainEnum() == expected
 
         where:
         expected    | referrer1                 | referrer2

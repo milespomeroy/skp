@@ -27,15 +27,12 @@ public class AggregateSearchKeywordPerformance {
     }
 
     public void aggregate() {
-        Optional<SearchReferrer> optSearchReferrer;
         for(UniqueHit uniqueHit : uniqueHits) {
-            optSearchReferrer = uniqueHit.getSearchReferrer();
-
-            if(! optSearchReferrer.isPresent()) {
+            if(uniqueHit.getSearchDomainEnum() == null) {
                 continue;
             }
 
-            SearchReferrer searchReferrer = optSearchReferrer.get();
+            SearchReferrer searchReferrer = new SearchReferrer(uniqueHit.getSearchDomainEnum(), uniqueHit.getSearchKeyword());
             SearchKeywordPerformance skp = searchKeywordPerformanceBySearchReferrer.get(searchReferrer);
             BigDecimal revenue = uniqueHit.getRevenue();
 

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<row xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <delimiter>&#009;</delimiter>
+
+    <column xsi:type="String">
+        <name>ip</name>
+    </column>
+
+    <column xsi:type="String">
+        <name>search_domain</name>
+        <sortOrder>1</sortOrder>
+        <nullLowSortOrder>true</nullLowSortOrder>
+    </column>
+
+    <column xsi:type="String">
+        <name>search_keyword</name>
+        <sortOrder>2</sortOrder>
+        <nullLowSortOrder>true</nullLowSortOrder>
+    </column>
+
+    <column xsi:type="Decimal">
+        <name>revenue</name>
+    </column>
+</row>

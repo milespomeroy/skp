@@ -5,16 +5,16 @@ public enum SearchDomainEnum {
     YAHOO("search.yahoo.com", "p"),
     BING("bing.com", "q");
 
-    private String name;
+    private String domainName;
     private String queryParam;
 
-    SearchDomainEnum(String name, String queryParam) {
-        this.name = name;
+    SearchDomainEnum(String domainName, String queryParam) {
+        this.domainName = domainName;
         this.queryParam = queryParam;
     }
 
-    public String getName() {
-        return name;
+    public String getDomainName() {
+        return domainName;
     }
 
     public String getQueryParam() {

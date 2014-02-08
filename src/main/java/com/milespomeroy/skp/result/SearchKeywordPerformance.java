@@ -1,5 +1,6 @@
 package com.milespomeroy.skp.result;
 
+import com.milespomeroy.skp.hit.UniqueHit;
 import com.milespomeroy.skp.search.SearchReferrer;
 
 import java.math.BigDecimal;
@@ -10,9 +11,21 @@ public class SearchKeywordPerformance implements Comparable<SearchKeywordPerform
     private BigDecimal revenue;
 
     public SearchKeywordPerformance(SearchReferrer referrer, BigDecimal revenue) {
-        this.searchEngineDomain = referrer.getSearchDomain().getName();
+        this.searchEngineDomain = referrer.getSearchDomain().getDomainName();
         this.searchKeyword = referrer.getSearchKeyword();
         this.revenue = revenue;
+    }
+
+    public SearchKeywordPerformance(String searchEngineDomain, String searchKeyword, BigDecimal revenue) {
+        this.searchEngineDomain = searchEngineDomain;
+        this.searchKeyword = searchKeyword;
+        this.revenue = revenue;
+    }
+
+    public SearchKeywordPerformance(UniqueHit uniqueHit) {
+        this.searchEngineDomain = uniqueHit.getSearchDomainEnum().getDomainName();
+        this.searchKeyword = uniqueHit.getSearchKeyword();
+        this.revenue = uniqueHit.getRevenue();
     }
 
     public void addRevenue(BigDecimal revenue) {
